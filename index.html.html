@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Raqu (راق) - Artisanal Marketplace</title>
+    
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ecb613",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#221d10",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"],
+                        "sans": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: "Work Sans", sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #483f23;
+            border-radius: 10px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen selection:bg-primary/30">
+    <div id="root"></div>
+
+    <!-- React and related libraries -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Shared Components ---
+
+        const Header = ({ cartCount = 2 }) => {
+            const navigate = useNavigate();
+            return (
+                <header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+                    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-8">
+                        <div class="flex items-center gap-10">
+                            <Link to="/" class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary text-3xl">storm</span>
+                                <h1 class="text-2xl font-bold tracking-tight">Raqu <span class="text-primary">(راق)</span></h1>
+                            </Link>
+                            <nav class="hidden md:flex items-center gap-8">
+                                <Link to="/" class="text-sm font-medium hover:text-primary transition-colors">Categories</Link>
+                                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">Our Story</a>
+                                <a class="text-sm font-medium hover:text-primary transition-colors" href="#">New Arrivals</a>
+                            </nav>
+                        </div>
+                        <div class="flex items-center gap-4 flex-1 justify-end">
+                            <div class="hidden sm:flex items-center bg-primary/5 dark:bg-primary/10 rounded-full px-4 py-2 w-full max-w-xs border border-primary/10">
+                                <span class="material-symbols-outlined text-slate-500 text-xl">search</span>
+                                <input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500 text-slate-100" placeholder="Search crafts..." type="text"/>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+                                    <span class="material-symbols-outlined">person</span>
+                                </button>
+                                <Link to="/cart" class="p-2 hover:bg-primary/10 rounded-full transition-colors relative">
+                                    <span class="material-symbols-outlined">shopping_bag</span>
+                                    <span class="absolute top-1 right-1 bg-primary text-background-dark text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center">{cartCount}</span>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        const Footer = () => (
+            <footer class="bg-primary/5 dark:bg-background-dark border-t border-primary/10 pt-20 pb-10">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary text-3xl">storm</span>
+                                <h1 class="text-2xl font-bold">Raqu (راق)</h1>
+                            </div>
+                            <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                                Curating the finest handmade artisanal products from around the world. Quality, soul, and tradition in every piece.
+                            </p>
+                            <div class="flex gap-4">
+                                <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all" href="#"><span class="material-symbols-outlined text-xl">share</span></a>
+                                <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all" href="#"><span class="material-symbols-outlined text-xl">camera</span></a>
+                                <a class="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all" href="#"><span class="material-symbols-outlined text-xl">public</span></a>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg mb-8">Shop</h5>
+                            <ul class="space-y-4 text-slate-500 dark:text-slate-400 text-sm">
+                                <li><a class="hover:text-primary transition-colors" href="#">Ceramics</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Textiles</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Home Decor</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Gift Sets</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg mb-8">Company</h5>
+                            <ul class="space-y-4 text-slate-500 dark:text-slate-400 text-sm">
+                                <li><a class="hover:text-primary transition-colors" href="#">Our Story</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Artisan Spotlight</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Sustainability</a></li>
+                                <li><a class="hover:text-primary transition-colors" href="#">Contact Us</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg mb-8">Stay Inspired</h5>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Subscribe to receive updates, access to exclusive deals, and more.</p>
+                            <div class="space-y-3">
+                                <input class="w-full bg-background-light dark:bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary text-sm" placeholder="Email Address" type="email"/>
+                                <button class="w-full bg-primary text-background-dark font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t border-primary/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <p class="text-sm text-slate-500">© 2024 Raqu Artisanal. All rights reserved.</p>
+                        <div class="flex gap-8 text-sm text-slate-500">
+                            <a class="hover:text-primary" href="#">Privacy Policy</a>
+                            <a class="hover:text-primary" href="#">Terms of Service</a>
+                            <a class="hover:text-primary" href="#">Shipping Info</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        );
+
+        const ScrollToTop = () => {
+            const { pathname } = useLocation();
+            useEffect(() => {
+                window.scrollTo(0, 0);
+            }, [pathname]);
+            return null;
+        };
+
+        // --- Screen 1: Home Page ---
+
+        const HomePage = () => {
+            return (
+                <div class="fade-in">
+                    {/* Hero Section */}
+                    <section class="relative h-[85vh] w-full flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 z-0">
+                            <img alt="Artisan at work" class="w-full h-full object-cover opacity-60 dark:opacity-40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnmdvhdI74ZBMv4B458ahemvrfiyHqQvuHbKmW_K5BacdyVmDdbVum_zLBBhJAx7zOQd2tOHEsBGf7rvsjY3QTQpyYyOS4omGRY3q6CaqgpyK_vpp_RvsFwOIqSoeaIr6X7BP_B7MiV0SwkUG4dSExq2G6WztTAgenHCT9lA7-eVDC3UZD0sY1BFpFmes6jsSDpRP9xG5OJ2KRXpVTxcb9rBj9MAFhjzfyCDxWWp9hmNPtQY4md-6MWHVOmXRk083Jbo8Pd6X-Nrk"/>
+                            <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-background-dark/20"></div>
+                        </div>
+                        <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+                            <h2 class="text-4xl md:text-7xl font-black mb-6 leading-tight">
+                                Discover the Art of Handmade <br/>
+                                <span class="text-primary font-light block mt-2">عيله علي ابو كارم </span>
+                            </h2>
+                            <p class="text-lg md:text-2xl font-light mb-10 text-slate-300">
+                                Timeless pieces, crafted with soul <br/>
+                                <span class="text-base opacity-80">(قطع خالدة، صُنعت بشغف)</span>
+                            </p>
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <Link to="/product" class="bg-primary text-background-dark px-10 py-4 rounded-lg font-bold text-lg hover:scale-105 transition-transform">
+                                    Shop Now
+                                </Link>
+                                <button class="border border-primary/40 px-10 py-4 rounded-lg font-bold text-lg hover:bg-primary/10 transition-colors">
+                                    Explore Collection
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Categories Section */}
+                    <section class="py-24 max-w-7xl mx-auto px-6">
+                        <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+                            <div>
+                                <span class="text-primary font-semibold tracking-widest uppercase text-sm">Collections</span>
+                                <h3 class="text-4xl font-bold mt-2">Curated Categories</h3>
+                            </div>
+                            <a class="text-primary font-medium hover:underline flex items-center gap-2" href="#">View All Categories <span class="material-symbols-outlined">arrow_forward</span></a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                            {/* Category 1 */}
+                            <Link to="/product" class="group text-center">
+                                <div class="aspect-square rounded-2xl overflow-hidden mb-6 relative border border-primary/10">
+                                    <img alt="Ceramics" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeUlJcaa4hSHiEUvyIwOJDbPtOasHONag1k0pM1FcdAtAVGhv8dciHAzmTFW-9I67NPY2GU0tE7zuMWkJLyQK1vkp6cBRrpMdSJrGOGur3X_8oBT3o6y1R3_ksuoUNOkkQM8X5Z-0Xz29ME-Bw5rjhs4nHbGOLwVPbFGGNL-WiPgjCjqSGIh0TW6wQN3Lyod9nY91zwyCFsrBttjef9lOOl3yvBpduWkcPvLvGAZHHofl6y8bBMyBBQsZuFbyxX6x6Jsv7js2G3GY"/>
+                                    <div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors"></div>
+                                </div>
+                                <h4 class="text-2xl font-bold">Ceramics</h4>
+                                <p class="text-slate-500 dark:text-slate-400 mt-1">Hand-thrown pottery</p>
+                            </Link>
+                            {/* Category 2 */}
+                            <a class="group text-center" href="#">
+                                <div class="aspect-square rounded-2xl overflow-hidden mb-6 relative border border-primary/10">
+                                    <img alt="Textiles" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbJaptwxyfRhjSPZWAwrPPmxG_6dyGW093JqgpnCDStkmimd0dxvR8QnProMiZ_05-nyBJ_HQi5bgfsuX0Ep_hVcReTO13nNYJ_CLPBvJjDUP7QbEIcVk4thl6SUIPnq_jww6m4xXNiso0fSLC07PPq60t6Wb7mkZbia26K7Auv7yqztvOK4l7S5XU_ifk-q3__THma3g59Hh-2V7-9-qGQ1iElzRwZpLVpznbrLsL3rFss8hm226-4fhJyhtYDJ8eQAoiv3OmPQc"/>
+                                    <div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors"></div>
+                                </div>
+                                <h4 class="text-2xl font-bold">Textiles</h4>
+                                <p class="text-slate-500 dark:text-slate-400 mt-1">Woven with tradition</p>
+                            </a>
+                            {/* Category 3 */}
+                            <a class="group text-center" href="#">
+                                <div class="aspect-square rounded-2xl overflow-hidden mb-6 relative border border-primary/10">
+                                    <img alt="Home Decor" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEx06JCttynDqFq2loQcWUC4ba99bD2thNpgh1u_2Kytx7X4yig3kivmoUX7LEYsNvEJwVGBMIa-ynOopcx-u-AFfyrqVB4zqoaarMLbSmL4x3XXlZUP0FkwYPrWjZqVTZu4qChMMHg7CY9v7LuY2njC0lW6axr4b2bGXx76YcLhh6_0-4zeX9w5GZ3dJ-rFgqJxe7J0baHb1yZF8gml9jp6wVchCXeyoLMgIpaaJPWq2cF3BfYmScJX2H6cNSIMxc4INiAUPoI4Q"/>
+                                    <div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors"></div>
+                                </div>
+                                <h4 class="text-2xl font-bold">Home Decor</h4>
+                                <p class="text-slate-500 dark:text-slate-400 mt-1">Art for your space</p>
+                            </a>
+                        </div>
+                    </section>
+
+                    {/* Featured Products */}
+                    <section class="py-24 bg-primary/5 dark:bg-primary/[0.02]">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="text-center mb-16">
+                                <h3 class="text-4xl font-bold">Our Masterpieces</h3>
+                                <p class="text-slate-500 dark:text-slate-400 mt-4 max-w-2xl mx-auto">Selected by our curators for their exceptional quality and artisanal heritage.</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {/* Product 1 */}
+                                <Link to="/product" class="group bg-background-light dark:bg-background-dark rounded-xl overflow-hidden border border-primary/10 hover:shadow-2xl hover:shadow-primary/5 transition-all">
+                                    <div class="relative aspect-[4/5] overflow-hidden">
+                                        <img alt="Ceramic Vase" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsEdp2Olf2mexS-2EbHH8qypXufG4QBCJy7LLKxT224YmUyQtW-164gYBHFGbnparI8HfzCp5BymdHjRNlpCMS6lQtffEit9nsdnXmsJ5UtxVt63wxX5DBHvHI4n7SbH5pBH0Y0unjq41lkleYwcy4FJtZT5QtoD93Wi0slOyZSIRHThCdksVh0ciE7jaGJuGRzOyUN09-PG8wWuvICwATvpu05bNnWRBLcyuGp87DbKoW8eYOv0G9rHfswjzK36J6ufkGOASfWGE"/>
+                                        <button class="absolute bottom-4 right-4 bg-primary text-background-dark p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                            <span class="material-symbols-outlined">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                    <div class="p-6">
+                                        <h5 class="font-bold text-lg mb-1">Hand-painted Ceramic Vase</h5>
+                                        <p class="text-primary font-semibold">$120.00</p>
+                                    </div>
+                                </Link>
+                                {/* More products (mocked) */}
+                                {[
+                                    { name: "Artisan Woven Rug", price: "$350.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDgpV1yf_ooYVZQtkZlxb_EeFWD460x0UvE8HDo3X8nqE4nCZ7qIOSsp27VkKLIeRmsYtv-Vy0yYuaebcBQsRk8l0cGYYoVGL9_mGEfXWYBy3EgbldXISHdUFUu_Ej6rRw_ejFj6Pe-UI1y-yJzUX3jIcE3_5TwYOLDTLIjHYL79vxM51yMpcNanKVyZWvE684DLx2xX7wcH7sbn_kwxxDhgCHSGuNVT5LWpzASIR3f0GnYalt1b-5sqh-MhUnMwaftFtMHVOuqdIM" },
+                                    { name: "Engraved Brass Lamp", price: "$210.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEhIs9fwnwae1hOUaezZVM9vJ_6xXLUnJIBGUL_6fnIuf7tMT4562dI0frEiDm-TDf36tkDgDEQp6rsMAcA0N2h4Dj3XyiWNdWnTs-2h5CiZp6rxGtiYQgVir83-zI1U9ioQSOJxUwosihHP8KTgzkUePtCC0HNu8k7EL66AjoDwIDmmpBJeVBdI9hM7kIoN01VVUuLRydPnnM17KIIDyDYSZlAk131Gg_wvyryc4dvolrYWcHUHG0Vw6pkSRJ2oQdHx1Ck9hLu98" },
+                                    { name: "Embroidered Linen Pillow", price: "$65.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuD1mDfJdDq-2Zzdv6qVTMCoL-s0OJP5CCNWitmVZcWpWdNiZIyZWeTUM3ncHTFA4iBaOlGIvlp5-fZHlaRIzWIhz8U0pCOvP78lw5wIr6yog2rozPfn6rY3eWIA5onf3S4Hy8jrVlr3EWrwS7dPQcWDUJy-KQxPJwqtRVg22U_xsk6blijdnZrnlFf1YFiRCdtes7cmreEtdqJ6BKxzK8tA7KWhDMYaZ9N_DYsC2IjairuE75ubbsPlLGCigRBLPro6DWNqZViQZtg" }
+                                ].map((p, idx) => (
+                                    <div key={idx} class="group bg-background-light dark:bg-background-dark rounded-xl overflow-hidden border border-primary/10 hover:shadow-2xl hover:shadow-primary/5 transition-all">
+                                        <div class="relative aspect-[4/5] overflow-hidden">
+                                            <img alt={p.name} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={p.img}/>
+                                            <button class="absolute bottom-4 right-4 bg-primary text-background-dark p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                                <span class="material-symbols-outlined">add_shopping_cart</span>
+                                            </button>
+                                        </div>
+                                        <div class="p-6">
+                                            <h5 class="font-bold text-lg mb-1">{p.name}</h5>
+                                            <p class="text-primary font-semibold">{p.price}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Brand Story */}
+                    <section class="py-24 max-w-7xl mx-auto px-6 overflow-hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+                            <div class="relative">
+                                <div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+                                <img alt="Brand Story" class="rounded-2xl w-full h-[600px] object-cover relative z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY-mDmaLKR3AOj-ZXzg4DoBOYnTwDYb4XpWnKBBtQ0xLzdu0RWGFt5W4GfFo1VIxB0QzQPu_iZmjH5rdw1822-3GJ_T7JvNBJLimp5jsCCSwMntQ8ypa5zc1Tnbnoo2OmALOomgNxj6aRi1xMTyhp75IvA3r95e0vhvp_UbJZ8yTz-dPbKlMSL0nkVSvPDYK89vgH8rSFhkdMwRh-WEZaTSMKRbpm5BpyZOAOeDNrZjxiRzyukHzX3rPMGrZXvQQkNSh7v4oIlVfY"/>
+                                <div class="absolute -bottom-6 -right-6 bg-primary p-8 rounded-2xl z-20 hidden md:block">
+                                    <p class="text-background-dark font-black text-3xl">Est. 2024</p>
+                                </div>
+                            </div>
+                            <div class="space-y-8">
+                                <div>
+                                    <span class="text-primary font-semibold tracking-widest uppercase text-sm">Our Philosophy</span>
+                                    <h3 class="text-5xl font-bold mt-2">More than just products. <br/> (أكثر من مجرد منتجات)</h3>
+                                </div>
+                                <p class="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    At Raqu, we believe that every object tells a story. Our mission is to bridge the gap between talented local artisans and modern homes, preserving ancient crafts that have been passed down through generations.
+                                </p>
+                                <p class="text-lg text-slate-600 dark:text-slate-400 italic border-l-4 border-primary pl-6">
+                                    "نحن نؤمن بأن كل قطعة تحمل في طياتها حكاية، ومهمتنا هي الحفاظ على الحرف التقليدية ودعم الحرفيين المحليين."
+                                </p>
+                                <div class="pt-6">
+                                    <button class="group flex items-center gap-3 font-bold text-lg hover:text-primary transition-colors">
+                                        Read Our Full Story
+                                        <span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_right_alt</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        // --- Screen 2: Product Detail ---
+
+        const ProductDetail = () => {
+            const [selectedImg, setSelectedImg] = useState(0);
+            const images = [
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuDyiMWcnaBig8QxpQLNe7Pid9r80yD2EK-NqzGS8rYO6EuyIuYt2KOHf1DhY17uOb_SCWYk_PfeFahXyHHqTxaurfgsi81cPE_sZ6cCyBPMGpWPbeVhbrgyHUsfwos0dLmrK7PHwVNmSu1FEgmi7VM_3uBLu81F28x5oA0vltVMFcEONg6CrwF0jVa-AnYwvO25bpTCwWiGJX0XRP2iiOSE6auB-rQBZualRYpCZJTX5tROYwo8VDNwJilbDhHrdbRozylg3p76O24",
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuBv5T7HgpCZiE5N5MaZbJ4uJO2pNaO0wplbBGoTa-Ap5ZA5cXs3rIGqy9KcQ_cUu06F0eGSrspw5vXhAjwpBNmhzaQyQPxbpwIwPL9hL9eoOkSdyZfo5uZAIw9aNRmoWoHhdCzEQZUddNZZaDBfbYnn4vG7dxDp27S_kJeZHip4Lj5NhqMWgT53bT7rYCSkA-S8pC2AvoNhCtOrQThsvYdrtCptadLWf8_FnrsWL_r7_hffiISAWUlT-73VFdKxMhOfaEhFZ6lyJH8",
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuANO7X6vVADO1t0Cwd3gtk6HWfFdTUIOP0nrW7uGUvzqQDs-1A06Ncka-d8xHMYoEwV8osE8EJo8FOKy1kXPppYq7eyxcmN89Goxd-eSUzidRx1KWIWmgOO5L5VOgAnkVRR00Ej3THfxkyuw4TBxighMy1cRqmqLwo5H179PZHCkjW2UKg74dQTKW5KpkvObG6AEGq5xaNb3IBOOl1l0a2xDlISuYH-88ZQVMg4x3GY3G6osKFY5iqwR8Vm2udz20j1zkwcV5e2zcQ",
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuCAlfTnq1CXLBQLBkuOEUsemK1qid1dz3X7-1qEEUPGKCYqq_A7aWvkLpEDwPR_7_ej2EsQ9ywiw18ijwuvRrGGwwR29GmG7MHBQhgknoJiwY9-hgZwzoKlvf4Eu3kszzqS1rGRxFIuZ76M1xZolpPAJmOwkjb49RGZE_T2yaB4z6ZLR0nf1XMaNBPeHVKZbfvustjxwQavgIvEJzss2qFEd816_sSRJODEND0VxwQraemeMxG2MVGOKKnFHY4ZM3YjhzAeEiDshaw"
+            ];
+
+            return (
+                <div class="fade-in max-w-7xl mx-auto w-full px-4 lg:px-20 py-8 lg:py-12">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* Product Image Gallery */}
+                        <div class="space-y-4">
+                            <div class="aspect-[4/5] rounded-xl overflow-hidden bg-primary/5 group">
+                                <img class="w-full h-full object-cover transition-transform duration-700" src={images[selectedImg]}/>
+                            </div>
+                            <div class="grid grid-cols-4 gap-4">
+                                {images.map((img, i) => (
+                                    <div 
+                                        key={i} 
+                                        onClick={() => setSelectedImg(i)}
+                                        class={`aspect-square rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${selectedImg === i ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
+                                    >
+                                        <img class="w-full h-full object-cover" src={img}/>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Product Info */}
+                        <div class="flex flex-col">
+                            <nav class="flex items-center gap-2 text-primary/60 text-sm mb-6">
+                                <Link to="/" class="hover:text-primary">Home</Link>
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                                <span>Ceramics</span>
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                                <span class="text-primary">Hand-Painted Vase</span>
+                            </nav>
+                            <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-2">Hand-Painted Ceramic Vase | مزهرية سيراميك مرسومة يدويًا</h1>
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="flex items-center bg-primary/20 px-2 py-1 rounded">
+                                    <div class="flex gap-0.5 text-primary">
+                                        {[1,2,3,4].map(i => <span key={i} class="material-symbols-outlined text-sm fill-icon">star</span>)}
+                                        <span class="material-symbols-outlined text-sm">star_half</span>
+                                    </div>
+                                    <span class="ml-2 text-sm font-bold text-primary">4.9</span>
+                                </div>
+                                <span class="text-primary/60 text-sm">128 authentic reviews</span>
+                            </div>
+                            <p class="text-3xl font-black text-slate-100 mb-8 tracking-tight">$145.00 <span class="text-sm font-normal text-primary/60 ml-2">VAT Included</span></p>
+                            
+                            <div class="space-y-6 border-y border-primary/10 py-8 mb-8">
+                                <div>
+                                    <h3 class="text-primary font-bold uppercase tracking-widest text-xs mb-3">The Material</h3>
+                                    <p class="text-primary/80 leading-relaxed text-sm">Sourced from the mineral-rich clay of the Nile banks, this piece is double-fired at 1200°C for durability and finished with a lead-free turquoise glaze and 18k gold leaf detailing.</p>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">eco</span>
+                                        <span class="text-sm">Eco-friendly Clay</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">brush</span>
+                                        <span class="text-sm">Hand-Glazed</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">height</span>
+                                        <span class="text-sm">32cm x 15cm</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">verified</span>
+                                        <span class="text-sm">Artisan Certified</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-4 mb-10">
+                                <Link to="/cart" class="flex-1 bg-primary text-background-dark font-bold py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10">
+                                    <span class="material-symbols-outlined">shopping_bag</span>
+                                    Add to Cart
+                                </Link>
+                                <button class="flex-1 border-2 border-primary text-primary font-bold py-4 rounded-lg hover:bg-primary/5 transition-colors">
+                                    Buy it now
+                                </button>
+                                <button class="p-4 border-2 border-primary/20 rounded-lg text-primary hover:border-primary/50 transition-colors">
+                                    <span class="material-symbols-outlined">favorite</span>
+                                </button>
+                            </div>
+
+                            <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                                <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                                    Artisan Note
+                                </h3>
+                                <p class="text-slate-100/70 italic text-sm leading-relaxed">
+                                    "Each swirl of blue represents the movement of the Mediterranean tides. No two vases are exactly alike, as the kiln's fire leaves its own unique mark on every piece." — <span class="text-primary font-medium">Master Artisan Omar K.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Related */}
+                    <section class="mt-24 pb-12">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="text-2xl font-bold">Related Masterpieces</h2>
+                            <a class="text-primary text-sm font-bold flex items-center gap-1 hover:underline" href="#">
+                                View Collection <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { name: "Desert Bloom Pot", price: "$85.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC9r6X1dWELaSeWyN9HltYIqLF3zipJYlqmSAVJUSum4UJFLPR8on93IAqUM-diMlypgcN3T6_Yp36RQQ7Z547qAw5UcRKbB0Rh44I1XmkjFzl2aX2CUe4ciAb3FuM7NDDjkrNoynqcTg3PmBGUmZpTxw8chTX0YhTK-jzQJv-AqTSF5fFj5t5R4YWmsr3N0loE7EStRttQC-8i5P7DISMcY0dmhY6Uirfl-VUOyTRtlYCyNkT8Q7y7p42fAmYWMFvn2iPmDgs2mno" },
+                                { name: "Cerulean Plate Set", price: "$210.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCNf8jyQf0chBIxMXr6S56fY1YXRuVHVxO-4WRvGLEkeWWf0wQMD76xHv4qFIHVWtFsyvnIJdhml8VL07SZp9UJxGYVYoAWpLt2VViia6VjQ4SMVeNzLFJAe9VD-zayfvd7a4GGJPv8ySCyRf0LWY0EewFG26el6-1VkbzuylWnp8_CE3FjjtQNoqN9S1ouYpv8ZxG1AYUFfHV5YPVPq9Pw_slIZRITbJ1UZTWJq4MKxYV4M5mc2Cr8ygSd_9rusSXn2i8STZ8Td54" },
+                                { name: "Siwa Sands Jug", price: "$65.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuA3HfLG6_3n1jjecOxHrHGlRB6MqdrEoUId6EiS2sHULnJSsvxl4w7vQubzWfKMN6ShIg5Tlft_xUCAzwICK-cO4KUe4RafFNborYngcXnn42dtoG-AyBZGdQE0kO49zRbKIIqTf9jnty8k437K9rUUjyXPi95-eMcBAFfYkW-4Kz6Suz0mDc9GoRbG4Ry1_VaqPLPGnms6EOX9rxbZFK9ljCbMtgQelNjRNd7hxGWHwkBxvOw2qeOTajwqfRgV9uY0MQ8Ke61z8LU" },
+                                { name: "Rustic Earth Planter", price: "$120.00", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuB1T6gczCrf3TVPoW5ioq5J6J36tCPHvBOc_cIneXSoGNDFuTnc5RjIgjoPZBYJRryVfEqcoMDfECJtrndFuMMhmB_nWahX9JNVoECDwW1H9GE0Cm1G4KnwGnedqS3RofBNNh0uZSyWTCU9DLeXe2f9my7t0NyAt2HJ9oc-kSlYX4J0oEmdEijaKRDXPJm_FqKpez1Hys0kqmkZqW98AaYlqHKBGz3PkZFZp7Wd_X3UawWzsagGqopgY1uA1RaTaijn-sZ_08I3tpQ" }
+                            ].map((p, idx) => (
+                                <div key={idx} class="group cursor-pointer">
+                                    <div class="aspect-[3/4] rounded-lg overflow-hidden bg-primary/5 mb-4">
+                                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src={p.img}/>
+                                    </div>
+                                    <h3 class="font-bold text-sm mb-1">{p.name}</h3>
+                                    <p class="text-primary text-sm font-bold">{p.price}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        // --- Screen 3: Cart Page ---
+
+        const CartPage = () => {
+            const [items, setItems] = useState([
+                {
+                    id: 1,
+                    name: "Hand-painted Ceramic Vase",
+                    category: "Artisan Collection",
+                    price: 450,
+                    qty: 1,
+                    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDKXggszCkYmUFxseZ-d_6elS3P6hGfJkwqhi5sNG3cEhQmsPc5nSSzgIS5hL-bEUpLKQxxP1I0dce3LK4mf-SsZvaDRlpcfkoR6pK_5DIXxNwwnIweuVNHCH9Lnn-l8apS0to_oO3SrefS_pgd_4-0pliec920Qm7zzdFHm5PmbJJTLl_L_B8PpxIRRCY3R6NojFuFv77ZCFBNTw7UYvLc1sCfzzjr9zLvqQ_N_ndOFNdZpgz62L8rE8lhyqdq3oHcgGy-_ghqj1o"
+                },
+                {
+                    id: 2,
+                    name: "Artisan Woven Rug",
+                    category: "Traditional Weave",
+                    price: 1200,
+                    qty: 1,
+                    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMm4X08-0CwGNZ_tncB7hhNszrlfdZqJYlany50buzJZPCxaamdWouYlDW-yBWmIiwkHDp5Vs6vOEysIPXK6TXkxcl4NwUcWVBqpJjk4mn68f4kSKH9zKfYXLOFAxIopCelNOOGckPGAjN5tb7qwL_KMme6eZABxcolXaabxdGhUYbK4nvJMQSvtIzJ-ssxB-Qb4JVIJPcWi2ReCp3zm-F8JbQYWsPP3AkLv9ZvPSvpWmPH6wfFeoVgim8PGZI1Auo3vBr9sEKsjw"
+                }
+            ]);
+
+            const updateQty = (id, delta) => {
+                setItems(items.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+            };
+
+            const removeItem = (id) => {
+                setItems(items.filter(i => i.id !== id));
+            };
+
+            const subtotal = items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+            const tax = subtotal * 0.15;
+            const total = subtotal + tax;
+
+            return (
+                <main class="flex-1 px-6 md:px-20 py-10 max-w-7xl mx-auto w-full fade-in">
+                    <div class="mb-10">
+                        <h1 class="text-4xl font-black tracking-tight mb-2">Shopping Cart | <span class="text-primary">سلة المشتريات</span></h1>
+                        <p class="text-slate-500 dark:text-primary/60">Manage your artisan selection and proceed to checkout.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-primary/20 bg-white dark:bg-background-dark/50">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 dark:bg-primary/5 border-b border-slate-200 dark:border-primary/20">
+                                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/80">Product Details</th>
+                                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/80">Quantity</th>
+                                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/80">Price</th>
+                                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/80 text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-primary/10">
+                                        {items.map(item => (
+                                            <tr key={item.id} class="group hover:bg-slate-50/50 dark:hover:bg-primary/5 transition-colors">
+                                                <td class="px-6 py-6">
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-primary/10">
+                                                            <img class="h-full w-full object-cover" src={item.img}/>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="font-bold text-slate-900 dark:text-slate-100">{item.name}</h3>
+                                                            <p class="text-xs text-slate-500 dark:text-primary/60 uppercase">{item.category}</p>
+                                                            <button 
+                                                                onClick={() => removeItem(item.id)}
+                                                                class="mt-2 text-xs font-medium text-red-500 hover:text-red-600 flex items-center gap-1">
+                                                                <span class="material-symbols-outlined text-sm">delete</span> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-6">
+                                                    <div class="flex items-center border border-slate-200 dark:border-primary/20 rounded-lg w-fit overflow-hidden">
+                                                        <button onClick={() => updateQty(item.id, -1)} class="px-3 py-1 hover:bg-slate-100 dark:hover:bg-primary/20 text-slate-600 dark:text-primary">-</button>
+                                                        <span class="px-4 py-1 text-sm font-medium border-x border-slate-200 dark:border-primary/20">{item.qty}</span>
+                                                        <button onClick={() => updateQty(item.id, 1)} class="px-3 py-1 hover:bg-slate-100 dark:hover:bg-primary/20 text-slate-600 dark:text-primary">+</button>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-6">
+                                                    <span class="text-sm font-semibold">SAR {item.price}</span>
+                                                </td>
+                                                <td class="px-6 py-6 text-right">
+                                                    <span class="text-sm font-bold text-primary">SAR {item.price * item.qty}</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {items.length === 0 && (
+                                            <tr>
+                                                <td colSpan="4" class="px-6 py-20 text-center text-slate-500">
+                                                    Your cart is empty.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <Link to="/" class="inline-flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                                    Continue Shopping
+                                </Link>
+                                <button onClick={() => setItems([])} class="text-sm font-medium text-slate-500 dark:text-primary/60 hover:text-primary transition-colors underline underline-offset-4">
+                                    Clear Shopping Cart
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-1">
+                            <div class="rounded-xl border border-slate-200 dark:border-primary/20 bg-white dark:bg-background-dark/50 p-6 sticky top-28">
+                                <h2 class="text-xl font-bold mb-6 flex items-center justify-between">
+                                    Order Summary <span>ملخص الطلب</span>
+                                </h2>
+                                <div class="space-y-4 mb-6">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-500 dark:text-primary/60">Subtotal</span>
+                                        <span class="font-medium">SAR {subtotal.toLocaleString()}</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-500 dark:text-primary/60">Estimated Shipping</span>
+                                        <span class="text-emerald-500 font-medium">Free</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-500 dark:text-primary/60">Tax (15%)</span>
+                                        <span class="font-medium">SAR {tax.toLocaleString()}</span>
+                                    </div>
+                                    <div class="pt-4 border-t border-slate-100 dark:border-primary/10 flex justify-between items-baseline">
+                                        <span class="text-lg font-bold">Total</span>
+                                        <span class="text-2xl font-black text-primary">SAR {total.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-primary/80 mb-2">Discount Code</label>
+                                    <div class="flex gap-2">
+                                        <input class="flex-1 rounded-lg bg-slate-50 dark:bg-primary/5 border border-slate-200 dark:border-primary/20 px-3 py-2 text-sm focus:ring-1 focus:ring-primary outline-none text-slate-100" placeholder="Enter code" type="text"/>
+                                        <button class="px-4 py-2 bg-slate-200 dark:bg-primary/20 rounded-lg text-sm font-bold hover:bg-slate-300 dark:hover:bg-primary/30 transition-colors">Apply</button>
+                                    </div>
+                                </div>
+                                <button class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+                                    Proceed to Checkout
+                                    <span class="material-symbols-outlined">lock</span>
+                                </button>
+                                <div class="mt-6 flex flex-wrap justify-center gap-4 grayscale opacity-60">
+                                    <span class="material-symbols-outlined text-2xl">credit_card</span>
+                                    <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                                    <span class="material-symbols-outlined text-2xl">payments</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            );
+        };
+
+        // --- Main App ---
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <ScrollToTop />
+                    <div className="flex flex-col min-h-screen">
+                        <Header />
+                        <main className="flex-grow">
+                            <Routes>
+                                <Route path="/" element={<HomePage />} />
+                                <Route path="/product" element={<ProductDetail />} />
+                                <Route path="/cart" element={<CartPage />} />
+                            </Routes>
+                        </main>
+                        <Footer />
+                    </div>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
